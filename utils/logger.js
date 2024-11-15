@@ -19,7 +19,7 @@ const logger = winston.createLogger({
             )
         }),
         new winston.transports.File({
-            filename: 'combined.log',
+            filename: 'logfile.log',
             format: winston.format.json()
         })
     ]

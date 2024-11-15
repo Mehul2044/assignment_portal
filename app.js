@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 const connectDB = require('./config/db');
 
@@ -19,6 +21,8 @@ app.get("/api", (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/admins', adminRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("*", (req, res) => {
     res.status(404).json({message: "Endpoint Not Found"});
