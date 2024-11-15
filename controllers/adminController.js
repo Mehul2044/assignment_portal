@@ -1,14 +1,30 @@
-const Assignment = require('../models/assignment');
-const {successResponse, errorResponse} = require('../utils/response');
-const bcrypt = require("bcrypt");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+
+const Assignment = require('../models/assignment');
+const User = require("../models/user");
+
+const {successResponse, errorResponse} = require('../utils/response');
 const logger = require('../utils/logger');
+const {validateUsername, validatePassword} = require("../utils/validation");
 
 
+/**
+ * Registers a new admin user.
+ *
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @param {string} req.body.username - The username of the admin to be registered.
+ * @param {string} req.body.password - The plaintext password of the admin to be registered.
+ *
+ * If the registration is successful, a 201 Created response is sent with the newly registered user's data.
+ * If an error occurs during the process, a 500 Internal Server Error response is sent with an error message.
+ */
 exports.register = async (req, res) => {
     const {username, password} = req.body;
     try {
+        validateUsername(username);
+        validatePassword(password);
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({username, password: hashedPassword, role: 'Admin'});
         await user.save();
@@ -20,6 +36,19 @@ exports.register = async (req, res) => {
     }
 };
 
+/**
+ * Authenticates an admin user and generates a JWT token for session management.
+ *
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @param {string} req.body.username - The username of the admin attempting to log in.
+ * @param {string} req.body.password - The plaintext password of the admin.
+ * @returns {Promise<void>} Resolves when the admin is successfully authenticated, rejects if authentication fails.
+ *
+ * If the login is successful, a JSON response with a token is sent.
+ * If the login fails due to invalid credentials, a 401 Unauthorized response is sent.
+ * If an error occurs during the process, a 500 Internal Server Error response is sent with an error message.
+ */
 exports.login = async (req, res) => {
     const {username, password} = req.body;
     try {
@@ -36,6 +65,15 @@ exports.login = async (req, res) => {
     }
 };
 
+/**
+ * Retrieves all assignments assigned to the current admin user.
+ *
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ *
+ * If the assignments are successfully retrieved, a JSON response with a 200 status code is sent.
+ * If an error occurs during the process, a 500 Internal Server Error response is sent with an error message.
+ */
 exports.getAssignments = async (req, res) => {
     try {
         const assignments = await Assignment.find({admin: req.user.id}).populate('userId', 'username');
@@ -47,6 +85,16 @@ exports.getAssignments = async (req, res) => {
     }
 };
 
+/**
+ * Accepts an assignment by updating its status to 'Accepted'.
+ *
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @param {string} req.params.id - The ID of the assignment to be accepted.
+ *
+ * If the acceptance is successful, a JSON response with a 200 status code is sent.
+ * If an error occurs during the process, a 500 Internal Server Error response is sent with an error message.
+ */
 exports.acceptAssignment = async (req, res) => {
     try {
         const assignment = await Assignment.findByIdAndUpdate(req.params.id, {status: 'Accepted'}, {new: true});
@@ -58,6 +106,16 @@ exports.acceptAssignment = async (req, res) => {
     }
 };
 
+/**
+ * Rejects an assignment by updating its status to 'Rejected'.
+ *
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @param {string} req.params.id - The ID of the assignment to be rejected.
+ *
+ * If the rejection is successful, a JSON response with a 200 status code is sent.
+ * If an error occurs during the process, a 500 Internal Server Error response is sent with an error message.
+ */
 exports.rejectAssignment = async (req, res) => {
     try {
         const assignment = await Assignment.findByIdAndUpdate(req.params.id, {status: 'Rejected'}, {new: true});
