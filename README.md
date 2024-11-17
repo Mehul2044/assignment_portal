@@ -12,6 +12,7 @@ It provides a platform for users to submit assignments and for admins to review 
 * Admin dashboard for managing assignments and users
 * Secure authentication and authorization using JSON Web Tokens (JWT)
 * Support for multiple user roles (admin, user)
+* Proper logging and error handling
 
 ## Functionalities
 
