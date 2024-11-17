@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 
 app.get("/health", (req, res) => {
-    res.status(200).json({message: "Healthy"});
+    res.status(200).json({message: "Server Up!"});
 });
 
 app.get("/api", (req, res) => {

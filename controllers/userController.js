@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
         res.status(201).json(successResponse('User registered successfully', user));
     } catch (error) {
         logger.error(`Registration failed: ${error}`);
-        res.status(500).json(errorResponse('Registration failed', error));
+        res.status(500).json(errorResponse('Registration failed', error.message));
     }
 };
 
@@ -52,7 +52,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const {username, password} = req.body;
     try {
-        const user = await User.findOne({username});
+        const user = await User.findOne({username, role: 'User'});
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json(errorResponse('Invalid credentials'));
         }
@@ -79,9 +79,9 @@ exports.login = async (req, res) => {
 exports.uploadAssignment = async (req, res) => {
     const {task, adminId} = req.body;
     try {
-        const assignment = new Assignment({userId: req.user.id, task, adminId});
+        const assignment = new Assignment({userId: req.user.id, task, admin: adminId});
         await assignment.save();
-        logger.info(`Assignment uploaded by ${req.user.username}`);
+        logger.info(`Assignment uploaded successfully`);
         res.status(201).json(successResponse('Assignment uploaded', assignment));
     } catch (error) {
         logger.error(`Failed to upload assignment: ${error}`);

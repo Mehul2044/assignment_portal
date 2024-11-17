@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
         res.status(201).json(successResponse('User registered successfully', user));
     } catch (error) {
         logger.error(`Registration failed: ${error}`);
-        res.status(500).json(errorResponse('Registration failed', error));
+        res.status(500).json(errorResponse('Registration failed', error.message));
     }
 };
 
@@ -52,7 +52,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const {username, password} = req.body;
     try {
-        const user = await User.findOne({username});
+        const user = await User.findOne({username, role: 'Admin'});
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json(errorResponse('Invalid credentials'));
         }

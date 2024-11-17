@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "author": "",
+  "author": "Mehul Agarwal",
   "license": "ISC",
   "description": "",
   "dependencies": {
